@@ -745,22 +745,6 @@ static std::string GenerateScreenshotFolderPath()
   return path;
 }
 
-static std::string GenerateScreenshotName()
-{
-  std::string path = GenerateScreenshotFolderPath();
-
-  // append gameId, path only contains the folder here.
-  path += SConfig::GetInstance().GetGameID();
-
-  std::string name;
-  for (int i = 1; File::Exists(name = StringFromFormat("%s-%d.png", path.c_str(), i)); ++i)
-  {
-    // TODO?
-  }
-
-  return name;
-}
-
 static std::string MeleeScreenshotName()
 {
   static long int i = 0;
@@ -773,13 +757,32 @@ static std::string MeleeScreenshotName()
   return folderPath + std::to_string(i) + ".png";
 }
 
+static std::string GenerateScreenshotName()
+{
+  const std::string gameID = SConfig::GetInstance().GetGameID();
+  if (gameID == "GALE01") return MeleeScreenshotName();
+
+  std::string path = GenerateScreenshotFolderPath();
+
+  // append gameId, path only contains the folder here.
+  path += gameID;
+
+  std::string name;
+  for (int i = 1; File::Exists(name = StringFromFormat("%s-%d.png", path.c_str(), i)); ++i)
+  {
+    // TODO?
+  }
+
+  return name;
+}
+
 void SaveScreenShot()
 {
   const bool bPaused = (GetState() == CORE_PAUSE);
 
   SetState(CORE_PAUSE);
 
-  Renderer::SetScreenshot(MeleeScreenshotName());
+  Renderer::SetScreenshot(GenerateScreenshotName());
 
   if (!bPaused)
     SetState(CORE_RUN);
