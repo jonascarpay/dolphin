@@ -761,13 +761,25 @@ static std::string GenerateScreenshotName()
   return name;
 }
 
+static std::string MeleeScreenshotName()
+{
+  static long int i = 0;
+  const int folderSize = 10;
+  const std::string rootPath = "/Users/jmc/tmp/";
+
+  i++;
+  const std::string folderPath = rootPath + "melee" + std::to_string(i / folderSize) + "/";
+  File::CreateFullPath(folderPath);
+  return folderPath + std::to_string(i) + ".png";
+}
+
 void SaveScreenShot()
 {
   const bool bPaused = (GetState() == CORE_PAUSE);
 
   SetState(CORE_PAUSE);
 
-  Renderer::SetScreenshot(GenerateScreenshotName());
+  Renderer::SetScreenshot(MeleeScreenshotName());
 
   if (!bPaused)
     SetState(CORE_RUN);
