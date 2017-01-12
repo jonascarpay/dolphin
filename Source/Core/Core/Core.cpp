@@ -782,9 +782,11 @@ static std::string MeleeScreenshotName()
     int charStocks = PowerPC::HostRead_U8( staticPtrs[p] + stocksOffset );
     fileName += "_s_" + std::to_string(charStocks);
 
-    int charPct = PowerPC::HostRead_U8( staticPtrs[p] + stocksOffset );
-    fileName += "_p_" + std::to_string(charPct);
+    const u32 charPctRaw = PowerPC::HostRead_U32( PowerPC::HostRead_U32(PowerPC::HostRead_U32(entityPtrs[p]) + entityDataOffset) + percentOffset );
+    float pct;
+    std::memcpy( &pct, &charPctRaw, sizeof (float) );
 
+    fileName += "_p_" + std::to_string((int) std::floor(pct));
   }
 
   const std::string folderPath = rootPath + "melee" + std::to_string(i / folderSize) + "/";
