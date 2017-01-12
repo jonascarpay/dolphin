@@ -761,10 +761,10 @@ static std::string MeleeScreenshotName()
   u32 stocksOffset     = 0x8E; // Relative to static pointer
   u32 entityDataOffset = 0x2C; // Relative to entity pointer
   u32 percentOffset    = 0x1830; // Float, relative to data pointer
+  u32 externCharOffset = 0x04; // Relative to static pointer
 
   u32 staticPtrs[4] = { 0x80453080, 0x80453F10, 0x80454DA0, 0x80455C30 };
   u32 entityPtrs[4] = { 0x80453130, 0x80453FC0, 0x80454E50, 0x80455CE0 };
-  u32 charPtrs[4]   = { 0x803F0E0B, 0x803F0E2F, 0x803F0E53, 0x803F0E77 }; // Byte
 
   // build filename
   std::string fileName = "shot_" + std::to_string(i);
@@ -776,7 +776,7 @@ static std::string MeleeScreenshotName()
     int charOK = PowerPC::HostRead_U32( staticPtrs[p] + slotTypeOffset );
     fileName += "_t_" + std::to_string(charOK);
 
-    int charID = PowerPC::HostRead_U8(charPtrs[p]);
+    int charID = PowerPC::HostRead_U8(staticPtrs[p] + externCharOffset);
     fileName += "_c_" + std::to_string(charID);
 
     int charStocks = PowerPC::HostRead_U8( staticPtrs[p] + stocksOffset );
