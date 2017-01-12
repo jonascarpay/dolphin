@@ -747,14 +747,49 @@ static std::string GenerateScreenshotFolderPath()
 
 static std::string MeleeScreenshotName()
 {
-  static long int i = 0;
-  const int folderSize = 10;
+  static long int i = 0; i++;
+
+  // config
+  const int folderSize = 500;
   const std::string rootPath = "/Users/jmc/tmp/";
 
-  i++;
+  // addresses
+  const int gamePaused  = PowerPC::HostRead_U32(0x80479D68) == 0x10000000? 1 : 0 ;
+  const int currentStage = PowerPC::HostRead_U8( PowerPC::HostRead_U32(0x8049E6C8) + 0x88 );
+
+  u32 slotTypeOffset   = 0x08; // Relative to static pointer
+  u32 stocksOffset     = 0x8E; // Relative to static pointer
+  u32 entityDataOffset = 0x2C; // Relative to entity pointer
+  u32 percentOffset    = 0x1830; // Float, relative to data pointer
+
+  u32 staticPtrs[4] = { 0x80453080, 0x80453F10, 0x80454DA0, 0x80455C30 };
+  u32 entityPtrs[4] = { 0x80453130, 0x80453FC0, 0x80454E50, 0x80455CE0 };
+  u32 charPtrs[4]   = { 0x803F0E08, 0x803F0E2C, 0x803F0E50, 0x803F0E74 }; // Byte
+
+  // build filename
+  std::string fileName = "shot_" + std::to_string(i);
+  fileName += "_psd_" + std::to_string(gamePaused) + "_st_" + std::to_string(currentStage);
+
+  for (int p = 0; p < 4; ++p) {
+    fileName += "__p" + std::to_string(p+1);
+
+    int charOK = PowerPC::HostRead_U8( staticPtrs[p] + slotTypeOffset ) < 3 ? 1 : 0;
+    fileName += "_ok_" + std::to_string(charOK);
+
+    int charID = PowerPC::HostRead_U8(charPtrs[p]);
+    fileName += "_id_" + std::to_string(charID);
+
+    int charStocks = PowerPC::HostRead_U8( staticPtrs[p] + stocksOffset );
+    fileName += "_st_" + std::to_string(charStocks);
+
+    //int charPct = PowerPC::HostRead_U8( staticPtrs[p] + stocksOffset );
+    //fileName += "_pc_" + std::to_string(charPct);
+
+  }
+
   const std::string folderPath = rootPath + "melee" + std::to_string(i / folderSize) + "/";
   File::CreateFullPath(folderPath);
-  return folderPath + std::to_string(i) + ".png";
+  return folderPath + fileName + ".png";
 }
 
 static std::string GenerateScreenshotName()
