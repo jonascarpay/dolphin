@@ -757,11 +757,12 @@ static std::string MeleeScreenshotName()
   const int gamePaused   = PowerPC::HostRead_U32(0x80479D68) != 0;
   const int currentStage = PowerPC::HostRead_U32(0x8049E6C8 + 0x88);
 
-  u32 slotTypeOffset   = 0x08; // Relative to static pointer
-  u32 stocksOffset     = 0x8E; // Relative to static pointer
-  u32 entityDataOffset = 0x2C; // Relative to entity pointer
+  u32 slotTypeOffset   = 0x08;   // Relative to static pointer
+  u32 stocksOffset     = 0x8E;   // Relative to static pointer
+  u32 entityDataOffset = 0x2C;   // Relative to entity pointer
   u32 percentOffset    = 0x1830; // Float, relative to data pointer
-  u32 externCharOffset = 0x04; // Relative to static pointer
+  u32 externCharOffset = 0x04;   // Relative to static pointer
+  u32 aStateOffset     = 0x10;   // Relative to data pointer
 
   u32 staticPtrs[4] = { 0x80453080, 0x80453F10, 0x80454DA0, 0x80455C30 };
   u32 entityPtrs[4] = { 0x80453130, 0x80453FC0, 0x80454E50, 0x80455CE0 };
@@ -776,17 +777,25 @@ static std::string MeleeScreenshotName()
     int charOK = PowerPC::HostRead_U32( staticPtrs[p] + slotTypeOffset );
     fileName += "_t_" + std::to_string(charOK);
 
-    int charID = PowerPC::HostRead_U8(staticPtrs[p] + externCharOffset);
+    int charID = PowerPC::HostRead_U32( staticPtrs[p] + externCharOffset );
     fileName += "_c_" + std::to_string(charID);
 
     int charStocks = PowerPC::HostRead_U8( staticPtrs[p] + stocksOffset );
     fileName += "_s_" + std::to_string(charStocks);
 
-    const u32 charPctRaw = PowerPC::HostRead_U32( PowerPC::HostRead_U32(PowerPC::HostRead_U32(entityPtrs[p]) + entityDataOffset) + percentOffset );
-    float pct;
-    std::memcpy( &pct, &charPctRaw, sizeof (float) );
+    int charState = PowerPC::HostRead_U32( PowerPC::HostRead_U32(PowerPC::HostRead_U32(entityPtrs[p]) + entityDataOffset) + aStateOffset );
+    //fileName += "_q_" + std::to_string(charState);
 
-    fileName += "_p_" + std::to_string((int) std::floor(pct));
+    int pFinal = 0;
+    if (charState > 0x3) // States 0x0-0xA are death states during which no percentage is displayed, but still held in memory
+    {
+      float pct;
+      const u32 charPctRaw = PowerPC::HostRead_U32( PowerPC::HostRead_U32(PowerPC::HostRead_U32(entityPtrs[p]) + entityDataOffset) + percentOffset );
+      std::memcpy( &pct, &charPctRaw, sizeof (float) );
+      pFinal = (int) std::floor(pct);
+    }
+    fileName += "_p_" + std::to_string(pFinal);
+
   }
 
   const std::string folderPath = rootPath + "melee" + std::to_string(i / folderSize) + "/";
