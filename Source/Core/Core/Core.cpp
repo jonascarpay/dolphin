@@ -757,7 +757,7 @@ static std::string MeleeScreenshotName()
   const int gamePaused   = PowerPC::HostRead_U32(0x80479D68) != 0;
   const int currentStage = PowerPC::HostRead_U32(0x8049E6C8 + 0x88);
 
-  u32 slotTypeOffset   = 0x08;   // Relative to static pointer
+  u32 charInGameOffset = 0x00;   // Relative to static pointer
   u32 stocksOffset     = 0x8E;   // Relative to static pointer
   u32 entityDataOffset = 0x2C;   // Relative to entity pointer
   u32 percentOffset    = 0x1830; // Float, relative to data pointer
@@ -774,8 +774,8 @@ static std::string MeleeScreenshotName()
   for (int p = 0; p < 4; ++p) {
     fileName += "__p" + std::to_string(p+1);
 
-    int charOK = PowerPC::HostRead_U32( staticPtrs[p] + slotTypeOffset );
-    fileName += "_t_" + std::to_string(charOK);
+    int charOK = PowerPC::HostRead_U32( staticPtrs[p] + charInGameOffset );
+    fileName += "_g_" + std::to_string(charOK);
 
     int charID = PowerPC::HostRead_U32( staticPtrs[p] + externCharOffset );
     fileName += "_c_" + std::to_string(charID);
