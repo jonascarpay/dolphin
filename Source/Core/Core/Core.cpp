@@ -798,7 +798,7 @@ static std::string MeleeScreenshotName()
 
   }
 
-  const std::string folderPath = rootPath + "melee" + std::to_string(i / folderSize) + "/";
+  const std::string folderPath = rootPath + "melee" + std::to_string(i / folderSize) + "_" + std::to_string(Common::Timer::GetTimeSinceJan1970()) + "/";
   File::CreateFullPath(folderPath);
   return folderPath + fileName + ".png";
 }
