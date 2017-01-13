@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <cctype>
+#include <ctime>
 #include <cstring>
 #include <mutex>
 #include <queue>
@@ -774,7 +775,7 @@ static std::string MeleeScreenshotName()
   for (int p = 0; p < 4; ++p) {
     fileName += "__p" + std::to_string(p+1);
 
-    int charOK = PowerPC::HostRead_U32( staticPtrs[p] + charInGameOffset );
+    int charOK = PowerPC::HostRead_U32( staticPtrs[p] + charInGameOffset ) == 2;
     fileName += "_g_" + std::to_string(charOK);
 
     int charID = PowerPC::HostRead_U32( staticPtrs[p] + externCharOffset );
@@ -783,11 +784,10 @@ static std::string MeleeScreenshotName()
     int charStocks = PowerPC::HostRead_U8( staticPtrs[p] + stocksOffset );
     fileName += "_s_" + std::to_string(charStocks);
 
-    int charState = PowerPC::HostRead_U32( PowerPC::HostRead_U32(PowerPC::HostRead_U32(entityPtrs[p]) + entityDataOffset) + aStateOffset );
-    //fileName += "_q_" + std::to_string(charState);
-
     int pFinal = 0;
-    if (charState > 0x3) // States 0x0-0xA are death states during which no percentage is displayed, but still held in memory
+
+    int charState = PowerPC::HostRead_U32( PowerPC::HostRead_U32(PowerPC::HostRead_U32(entityPtrs[p]) + entityDataOffset) + aStateOffset );
+    if (charState > 0x3) // States 0x0-0x3 are death states during which no percentage is displayed, but the memory contains the pre-death percentage. States 0x3-0xA are star KO states, in which percentage is mostly displayed. This needs further tuning.
     {
       float pct;
       const u32 charPctRaw = PowerPC::HostRead_U32( PowerPC::HostRead_U32(PowerPC::HostRead_U32(entityPtrs[p]) + entityDataOffset) + percentOffset );
