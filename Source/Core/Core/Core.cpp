@@ -748,11 +748,18 @@ static std::string GenerateScreenshotFolderPath()
 
 static std::string MeleeScreenshotName()
 {
-  static long int i = 0; i++;
+  static long int i = 0;
+  static std::string folderName = "";
 
   // config
   const int folderSize = 500;
   const std::string rootPath = "/Users/jmc/tmp/";
+
+  if (i % folderSize == 0)
+  {
+    folderName = "melee" + std::to_string(i / folderSize) + "_" + std::to_string(Common::Timer::GetTimeSinceJan1970());
+  }
+  i++;
 
   // addresses
   const int gamePaused   = PowerPC::HostRead_U32(0x80479D68) != 0;
@@ -798,7 +805,7 @@ static std::string MeleeScreenshotName()
 
   }
 
-  const std::string folderPath = rootPath + "melee" + std::to_string(i / folderSize) + "_" + std::to_string(Common::Timer::GetTimeSinceJan1970()) + "/";
+  const std::string folderPath = rootPath + folderName + "/";
   File::CreateFullPath(folderPath);
   return folderPath + fileName + ".png";
 }
